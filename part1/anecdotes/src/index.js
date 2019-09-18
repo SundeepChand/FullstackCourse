@@ -13,9 +13,8 @@ const App = (props) => {
 
   // Function handler for next quote button.
   const generateNewIndex = () => {
-    const newIndex = Math.floor(Math.random() * anecdotes.length)
-    console.log(newIndex)
-    return newIndex
+      const newIndex = Math.floor(Math.random() * anecdotes.length)
+      return newIndex
   }
 
   // Function to increase the vote count & find the quote with max vote (calls getMaxVoteIndex)
@@ -36,7 +35,6 @@ const App = (props) => {
               maxIndex = i
       }
 
-      console.log(maxIndex)
       return maxIndex
   }
 
