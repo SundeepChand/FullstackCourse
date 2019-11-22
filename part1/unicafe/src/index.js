@@ -22,16 +22,16 @@ const Statistics = ({ data }) => {
         return (<p>No feedback given</p>)
     }
     return (
-    <div>
-        <table border="0" cellPadding="5px">
-            <Statistic text={"Good"} data={data.good} />
-            <Statistic text={"Neutral"} data={data.neutral} />
-            <Statistic text={"Bad"} data={data.bad} />
-            <Statistic text={"Total"} data={data.total} />
-            <Statistic text={"Average"} data={data.average} />
-            <Statistic text={"Positive"} data={data.positivePer} />
-        </table>
-    </div>
+        <div>
+            <table border="0" cellPadding="5px">
+                <Statistic text={"Good"} data={data.good} />
+                <Statistic text={"Neutral"} data={data.neutral} />
+                <Statistic text={"Bad"} data={data.bad} />
+                <Statistic text={"Total"} data={data.total} />
+                <Statistic text={"Average"} data={data.average} />
+                <Statistic text={"Positive"} data={data.positivePer} />
+            </table>
+        </div>
     )
 }
 
