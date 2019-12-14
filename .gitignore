@@ -1,4 +1,10 @@
 # Folder to test some random stuffs.
 /test
 .vscode
+
+# api
+.env
+/apixu
+
+# dependencies
 /node_modules

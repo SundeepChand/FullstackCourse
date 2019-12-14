@@ -1,15 +1,25 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Records from './components/Records'
 import AddForm from './components/AddForm'
 import Filter  from './components/Filter'
+import axios from 'axios'
 
-function App(props) {
+function App() {
     // State for the record elements.
-    const [records, setRecords] = useState(props.records)
+    const [records, setRecords] = useState([])
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [searchInput, setSearchInput] = useState('')
 
+    // Fetch the records from the server using axios.
+    useEffect(() => {
+        axios.get('http://localhost:3001/persons').then((response) => {
+            setRecords(response.data)
+        })
+    }, [])
+
+    // Create an array of records to show
+    // This will be used in the filter.
     let recordsToShow = records.filter((record) => record.name.toLowerCase().includes(searchInput.toLowerCase()))
 
     // handles the click event of the button.
