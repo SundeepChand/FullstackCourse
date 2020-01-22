@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import Records from './components/Records'
 import AddForm from './components/AddForm'
 import Filter  from './components/Filter'
+import SuccessBox from './components/SuccessBox'
+import ErrorBox from './components/ErrorBox'
 import serverComm from './services/serverComm'
 
 function App() {
@@ -10,6 +12,8 @@ function App() {
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [searchInput, setSearchInput] = useState('')
+    const [successMessage, setSuccessMessage] = useState(null)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     // Fetch the records from the server using axios.
     useEffect(() => {
@@ -44,8 +48,15 @@ function App() {
             .addNew(newRecord)
             .then(responseData => {
                 setRecords(records.concat(responseData))
+                
+                setSuccessMessage(`Successfully added ${newName}.`)
+                
                 setNewName('')
                 setNewNumber('')
+
+                setTimeout(() => {
+                    setSuccessMessage(null)
+                }, 3000)
             })
         }
         else {
@@ -63,6 +74,22 @@ function App() {
                 .then(responseData => {
                     setRecords(records.map(record => record.id === id ? responseData : record))
                     console.log(responseData)
+
+                    
+                    setSuccessMessage(`Successfully updated ${newName}.`)
+                    setTimeout(() => {
+                        setSuccessMessage(null)
+                    }, 3000)
+
+                })
+                .catch(() => {
+                    setErrorMessage(`${newName} has already been deleted.`)
+
+                    setRecords(records.filter((record) => record.name.toLowerCase() !== newName.toLowerCase()))
+                    
+                    setTimeout(() => {
+                        setErrorMessage(null)
+                    }, 2000)
                 })
 
                 setNewName('')
@@ -96,6 +123,15 @@ function App() {
                 console.log(`Deleted ${id}`)
                 setRecords(records.filter(record => record.id !== id))
             })
+            .catch(error => {
+                setErrorMessage(`${records.find((record) => record.id === id).name} has already been deleted.`)
+
+                setRecords(records.filter((record) => record.id !== id))
+
+                setTimeout(() => {
+                    setErrorMessage(null)
+                }, 2000)
+            })
         }
     }
 
@@ -104,6 +140,10 @@ function App() {
     return (
         <React.Fragment>
             <h2>Phonebook</h2>
+            
+            <SuccessBox message={successMessage} />
+            <ErrorBox message={errorMessage} />
+
             <Filter searchInput={searchInput} handleSearchChange={handleSearchChange} />
             <h3>Add New</h3>
             <AddForm newName={newName} newNumber={newNumber} handleNumberChange={handleNumberChange} 
