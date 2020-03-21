@@ -43,10 +43,11 @@ function App() {
                 name: newName,
                 number: newNumber,
             }
-
+            console.log("adding note...")
             serverComm
             .addNew(newRecord)
             .then(responseData => {
+                console.log('Exec in then')
                 setRecords(records.concat(responseData))
                 
                 setSuccessMessage(`Successfully added ${newName}.`)
@@ -58,8 +59,18 @@ function App() {
                     setSuccessMessage(null)
                 }, 3000)
             })
-        }
-        else {
+            .catch(error => {
+                setErrorMessage(error.response.data.error)
+
+                setNewName('')
+                setNewNumber('')
+                
+                setTimeout(() => {
+                    setErrorMessage(null)
+                }, 3000)                
+            })
+
+        } else {
             // Update the record then.
             if (window.confirm(`${newName} already exits.. Do you want to change the number?`)) {
                 
@@ -74,7 +85,6 @@ function App() {
                 .then(responseData => {
                     setRecords(records.map(record => record.id === id ? responseData : record))
                     console.log(responseData)
-
                     
                     setSuccessMessage(`Successfully updated ${newName}.`)
                     setTimeout(() => {
