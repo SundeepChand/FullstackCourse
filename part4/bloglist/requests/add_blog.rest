@@ -1,0 +1,9 @@
+post http://localhost:3001/api/blogs
+Content-Type: application/json
+Authorization: Bearer YOUR_SECRET_TOKEN
+
+{
+  "title": "Second blog from admin after login",
+  "author": "John Doe",
+  "url": "www.facebook.com"
+}
