@@ -31,7 +31,7 @@ blogRouter.post('/', async(request, response) => {
       author: body.author,
       url: body.url,
       user: user._id,
-      likes: body.likes === undefined ? 0 : body.likes
+      likes: body.likes === undefined || body.likes === '' ? 0 : body.likes
     }
     const blogObject = new Blog(newBlog)
 
@@ -40,6 +40,8 @@ blogRouter.post('/', async(request, response) => {
     user.blogs = user.blogs.concat(result._id)
     await user.save()
 
+    result.user = user
+    console.log(result.toJSON())
     response.status(201).json(result.toJSON())
   } catch (error) {
     response.status(401).json({ error: 'token missing or invalid' })
@@ -53,41 +55,25 @@ blogRouter.put('/:id', async(req, res) => {
     return res.status(400).end()
   }
 
-  let decodedToken
-  try {
-    decodedToken = jwt.verify(req.token, config.SECRET)
-    if (!req.token || !decodedToken) {
-      return res.status(401).json({ error: 'token missing or invalid' })
-    }
-  } catch(error) {
-    return res.status(401).json({ error: 'token missing or invalid' })
-  }
-
   const blogToBeUpdated = await Blog.findById(req.params.id)
   if (!blogToBeUpdated) {
     // The requested blog does not exist.
     return res.status(404).end()
   }
+  const user = await User.findById(req.body.user)
+  const newBlog = {
+    title: req.body.title,
+    author: req.body.author,
+    url: req.body.url,
+    user: user.id,
+    likes: req.body.likes === undefined ? 0 : req.body.likes
+  }
 
-  if (decodedToken.id.toString() === blogToBeUpdated.user.toString()) {
-    const user = await User.findById(decodedToken.id)
-    const newBlog = {
-      title: req.body.title,
-      author: req.body.author,
-      url: req.body.url,
-      user: user.id,
-      likes: req.body.likes === undefined ? 0 : req.body.likes
-    }
-
-    const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, newBlog, { new: true })
-    if (updatedBlog) {
-      res.json(updatedBlog)
-    } else {
-      res.status(404).end()
-    }
-
+  const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, newBlog, { new: true })
+  if (updatedBlog) {
+    res.json(updatedBlog)
   } else {
-    res.status(401).send({ error: 'a user cannot update posts created by other users.' })
+    res.status(404).end()
   }
 })
 
@@ -106,6 +92,12 @@ blogRouter.delete('/:id', async(req, res, next) => {
     }
 
     if (blogToBeDeleted.user.toString() === decodedToken.id.toString()) {
+      const user = await User.findById(decodedToken.id)
+      const newBlogs = user.blogs.filter(id => id.toString() !== req.params.id)
+
+      user.blogs = newBlogs
+      await user.save()
+
       await blogToBeDeleted.remove()
       return res.status(204).end()
     }
