@@ -120,8 +120,12 @@ const resolvers = {
   },
 
   Mutation: {
-    addBook: async(root, args) => {
+    addBook: async(root, args, context) => {
       
+      if (!context.currentUser) {
+        throw new UserInputError('Unauthorized access')
+      }
+
       const author = await Author.find({ name: args.author })
       let newAuthor = null
       if (author.length <= 0) {
@@ -154,7 +158,11 @@ const resolvers = {
       return newBook.populate('author')
     },
 
-    editAuthor: async(root, args) => {
+    editAuthor: async(root, args, context) => {
+      if (!context.currentUser) {
+        throw new UserInputError('Unauthorized access')
+      }
+
       const authorToChange = await Author.findOne({ name: args.name })
       if (authorToChange) {
         authorToChange.born = args.setBornTo
