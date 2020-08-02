@@ -1,8 +1,12 @@
 import React from 'react'
 
 export default function BookTable({ booksToShow }) {
+    if (!booksToShow) {
+      return <div>No books to show!</div>
+    }
+    
     return (
-        <table>
+      <table>
         <tbody>
           <tr>
             <th></th>

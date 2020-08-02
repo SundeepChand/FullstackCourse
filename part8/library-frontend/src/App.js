@@ -32,11 +32,12 @@ const renderNav = (loggedIn, setPage, logout) => {
 const App = () => {
   const [page, setPage] = useState('authors')
   const [loggedIn, setLoggedIn] = useState(localStorage.getItem('library-user-token'))
+  const [user, setUser] = useState(null)
   const client = useApolloClient()
 
   const currentUser = useQuery(ME, {
     onCompleted: () => {
-        console.log(currentUser.data)
+      setUser(currentUser.data.me)
     }
   })
 
@@ -61,6 +62,7 @@ const App = () => {
 
       <NewBook
         show={page === 'add'}
+        currentUser={user}
       />
 
       <YearForm
@@ -75,7 +77,7 @@ const App = () => {
 
       <Recommendations
         show={page === 'recommend'}
-        currentUser={currentUser}
+        currentUser={user}
       />
 
     </div>
