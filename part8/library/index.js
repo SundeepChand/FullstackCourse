@@ -90,13 +90,6 @@ const typeDefs = gql`
 `
 
 const resolvers = {
-  Author: {
-    bookCount: async(root) => {
-      const author = await Author.findOne({ name: root.name })
-      const books = await Book.find({ author: author._id })
-      return books.length
-    }
-  },
   Subscription: {
     bookAdded: {
       subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
@@ -150,6 +143,12 @@ const resolvers = {
         }
       } else {
         [ newAuthor ] = author
+        newAuthor.bookCount += 1
+        try {
+          await newAuthor.save()
+        } catch (error) {
+          throw new UserInputError(error.message)
+        }
       }
 
       const newBook = new Book({ 

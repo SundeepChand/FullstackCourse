@@ -1,5 +1,19 @@
 import { gql } from '@apollo/client'
 
+export const BOOK_ADDED = gql`
+subscription {
+  bookAdded {
+    id
+    title
+    published
+    author {
+      name
+    }
+    genres
+  }
+}
+`
+
 export const ALL_BOOKS = gql`
 query {
   allBooks {

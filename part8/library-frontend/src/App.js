@@ -5,8 +5,10 @@ import NewBook from './components/NewBook'
 import YearForm from './components/YearForm'
 import LoginForm from './components/LoginForm'
 import Recommendations from './components/Recommendations'
-import { useApolloClient, useQuery } from '@apollo/client'
-import { ME } from './queries'
+import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
+import { ME, BOOK_ADDED } from './queries'
+
+import updateCacheWith from './utils/updateCache'
 
 const renderNav = (loggedIn, setPage, logout) => {
   if (loggedIn) {
@@ -34,6 +36,14 @@ const App = () => {
   const [loggedIn, setLoggedIn] = useState(localStorage.getItem('library-user-token'))
   const [user, setUser] = useState(null)
   const client = useApolloClient()
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      console.log(subscriptionData)
+      window.alert(`Added book ${subscriptionData.data.bookAdded.title} by ${subscriptionData.data.bookAdded.author.name}.`)
+      updateCacheWith(client, subscriptionData.data.bookAdded)
+    }
+  })
 
   const currentUser = useQuery(ME, {
     onCompleted: () => {
