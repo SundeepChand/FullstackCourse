@@ -1,4 +1,4 @@
-const { ApolloServer, gql, UserInputError } = require('apollo-server')
+const { ApolloServer, gql, UserInputError, PubSub } = require('apollo-server')
 const mongoose = require('mongoose')
 const Book = require('./models/Book')
 const Author = require('./models/Author')
@@ -16,6 +16,8 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useFindAndModify: false, us
   .catch(err => {
     console.log('Error connecting to MongoDB: ', err)
   })
+
+const pubsub = new PubSub()
 
 const typeDefs = gql`
   type Genre {
@@ -58,6 +60,10 @@ const typeDefs = gql`
     me: User
   }
 
+  type Subscription {
+    bookAdded: Book!
+  }
+
   type Mutation {
     addBook(
       title: String!
@@ -90,6 +96,11 @@ const resolvers = {
       const books = await Book.find({ author: author._id })
       return books.length
     }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+    },
   },
   Query: {
     bookCount: () => Book.collection.countDocuments(),
@@ -155,7 +166,11 @@ const resolvers = {
           invalidArgs: args
         })
       }
-      return newBook.populate('author')
+
+      const bookToReturn = newBook.populate('author')
+      pubsub.publish('BOOK_ADDED', { bookAdded: bookToReturn })
+
+      return bookToReturn
     },
 
     editAuthor: async(root, args, context) => {
